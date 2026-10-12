@@ -206,7 +206,7 @@ void test_multiprocess_shuffled(void) {
     int B = 4;
     int T = 8;
     const int num_processes = 2;
-    int should_shuffle = 0;
+    int should_shuffle = 1;
     snprintf(shard_name, SHARD_NAME_LEN, "shard_????.bin");
     DataLoader loaders[num_processes];
     for (int i = 0; i < num_processes; i++) {
@@ -227,6 +227,15 @@ void test_multiprocess_shuffled(void) {
                 for (int n = 0; n < num_processes; n++) { // dataloader
                     DataLoader *loader = &loaders[n];
                     dataloader_next_batch(loader);
+                    // all processes must read adjacent slices of the same global batch
+                    for (int i = 0; i < BT; i++) {
+                        int expected = loaders[0].inputs[i] + n * BT;
+                        if (loader->inputs[i] != expected) {
+                            printf("Error: process %d input %d is token %d, expected %d\n",
+                                   n, i, loader->inputs[i], expected);
+                            exit(EXIT_FAILURE);
+                        }
+                    }
                     // count up the tokens we see
                     for (int i = 0; i < BT; i++) {
                         int input_token = loader->inputs[i];

@@ -169,7 +169,7 @@ void dataloader_init(DataLoader *loader,
 
     if (should_shuffle) {
         mt19937_state shuffle_rng;
-        manual_seed(&shuffle_rng, 42 + process_rank);
+        manual_seed(&shuffle_rng, 42);
         loader->shuffle_rng = shuffle_rng;
         loader->shard_indices = (int*)mallocCheck(loader->glob_result.gl_pathc * sizeof(int));
         init_identity_permutation(loader->shard_indices, (int) loader->glob_result.gl_pathc);
