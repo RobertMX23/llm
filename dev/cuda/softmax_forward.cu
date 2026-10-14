@@ -510,10 +510,6 @@ __global__ void softmax_forward_online_kernel8(float* out, const float* inp, int
     const int warpsPerBlock = blockDim.x / warpSize;
     int tid = threadIdx.x;
 
-    if (tid >= C) {
-        return;
-    }
-
     int warpId = tid / warpSize;
     int laneId = tid % warpSize;
     // one warp one row
@@ -547,7 +543,7 @@ __global__ void softmax_forward_online_kernel8(float* out, const float* inp, int
         if (offsetMaxval > maxval) {
             sumval *= expf(maxval - offsetMaxval);
             maxval = offsetMaxval;
-        } else {
+        } else if (offsetMaxval != -INFINITY) {
             offsetSumval *= expf(offsetMaxval - maxval);
         }
         sumval += offsetSumval;
